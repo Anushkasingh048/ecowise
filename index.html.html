@@ -1,0 +1,538 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Compare product costs, materials, durability, packaging and sustainability evidence.">
+<title>EcoWise | Green Product Decision Tool</title>
+<style>
+:root {
+  --green:#176b45;
+  --dark:#123d2b;
+  --pale:#edf6ef;
+  --border:#dce7de;
+  --text:#26372d;
+  --muted:#627267;
+  --white:#fff;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  margin:0; font-family:Arial,sans-serif; color:var(--text);
+  background:#f8faf7; line-height:1.6;
+}
+header {
+  background:var(--dark); color:white; padding:18px 6%;
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px; flex-wrap:wrap;
+}
+.brand { font-size:1.4rem; font-weight:800; }
+header a { color:white; text-decoration:none; margin-left:16px; }
+.hero { padding:55px 6%; background:var(--pale); }
+.hero h1 { font-size:clamp(2rem,5vw,3.5rem); line-height:1.15; margin:12px 0; }
+.hero h1 span { color:var(--green); }
+.hero p { max-width:680px; color:#4e6254; }
+main { max-width:1120px; margin:auto; padding:25px 20px 55px; }
+section { margin:35px 0; scroll-margin-top:20px; }
+h2 { color:var(--dark); }
+.muted { color:var(--muted); font-size:.93rem; }
+.notice {
+  padding:15px; border-left:4px solid #c38b25;
+  background:#fff8e8; border-radius:5px; margin:20px 0;
+}
+.toolbar, .form-grid {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;
+}
+.toolbar { grid-template-columns:2fr 1fr; margin:18px 0; }
+input,select,textarea,button {
+  width:100%; padding:11px; font:inherit; border-radius:7px;
+}
+input,select,textarea { border:1px solid #bfcfc2; background:white; color:var(--text); }
+textarea { resize:vertical; }
+button { border:0; cursor:pointer; font-weight:700; }
+.primary { background:var(--green); color:white; }
+.primary:hover { background:var(--dark); }
+.secondary { background:white; color:var(--green); border:1px solid var(--green); }
+.grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:16px;
+}
+.card, .panel {
+  background:white; border:1px solid var(--border); border-radius:12px;
+  padding:19px; box-shadow:0 3px 12px #163c2710;
+}
+.card h3 { margin:6px 0; }
+.pill {
+  display:inline-block; padding:3px 8px; background:var(--pale);
+  color:var(--green); border-radius:20px; font-size:.78rem;
+}
+.price { font-size:1.35rem; font-weight:800; }
+.metric { font-weight:700; color:var(--green); }
+.small { font-size:.85rem; color:var(--muted); }
+.card button { margin-top:12px; }
+.compare-controls {
+  display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;
+}
+.table-wrap { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; min-width:520px; }
+th,td { text-align:left; padding:11px; border-bottom:1px solid var(--border); }
+th { background:var(--pale); }
+.winner { background:#edf8ed; padding:16px; border-radius:8px; margin-top:15px; }
+.score { font-size:1.6rem; font-weight:800; color:var(--green); }
+label { display:block; font-weight:700; margin-bottom:5px; }
+.field { margin-bottom:12px; }
+.checkline { display:flex; align-items:flex-start; gap:10px; font-weight:400; }
+.checkline input { width:auto; margin-top:7px; }
+details { padding:12px 0; border-bottom:1px solid var(--border); }
+footer { padding:25px; background:var(--dark); color:white; text-align:center; }
+footer a { color:white; }
+@media(max-width:600px) {
+  header { padding:16px 5%; }
+  header nav { width:100%; }
+  header a { margin:0 12px 0 0; }
+  .hero { padding:38px 5%; }
+  main { padding:15px; }
+  .toolbar,.form-grid,.compare-controls { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">🌿 EcoWise</div>
+  <nav>
+    <a href="#catalogue">Products</a>
+    <a href="#compare">Compare</a>
+    <a href="#add">Add product</a>
+    <a href="#science">Methodology</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <span class="pill">CHE110 • GREEN CHEMISTRY PROJECT</span>
+  <h1>Buy thoughtfully.<br><span>Waste less.</span></h1>
+  <p>
+    Compare products by cost per use, materials, durability and end-of-life
+    options. Understand the trade-offs before you choose.
+  </p>
+  <a href="#catalogue"><button class="primary" style="width:auto">Explore products ↓</button></a>
+</div>
+
+<main>
+  <div class="notice">
+    <strong>Honest data policy</strong><br>
+    The starting products and ratings are demonstration examples, not verified
+    environmental measurements. The score is a transparent screening aid,
+    not a scientific lifecycle assessment. Check sources before relying on a claim.
+  </div>
+
+  <section id="catalogue">
+    <h2>Explore products</h2>
+    <p class="muted">Search the catalogue, filter by category, and select products to compare.</p>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search by product or material..." aria-label="Search products">
+      <select id="filter" aria-label="Filter category">
+        <option value="">All categories</option>
+        <option>Bottles</option>
+        <option>Bags</option>
+        <option>Personal care</option>
+        <option>Cleaning</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <p id="count" class="muted" aria-live="polite"></p>
+    <div id="catalogueGrid" class="grid"></div>
+  </section>
+
+  <section id="compare">
+    <h2>Compare two products</h2>
+    <p class="muted">Select products below. The tool calculates cost per use and compares the ratings shown in the catalogue.</p>
+    <div class="compare-controls">
+      <div class="field">
+        <label for="productA">Product A</label>
+        <select id="productA"></select>
+      </div>
+      <div class="field">
+        <label for="productB">Product B</label>
+        <select id="productB"></select>
+      </div>
+    </div>
+    <button id="compareBtn" class="primary">Compare products</button>
+    <div id="comparisonOutput" aria-live="polite"></div>
+  </section>
+
+  <section id="add">
+    <h2>Add a product</h2>
+    <p class="muted">Enter details from a product label, manufacturer, receipt or credible source. Ratings are your documented assessments, not automatic facts.</p>
+    <div class="panel">
+      <form id="addForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Product name *</label>
+            <input id="name" required maxlength="80" placeholder="e.g. Refillable bottle">
+          </div>
+          <div class="field">
+            <label for="category">Category *</label>
+            <select id="category" required>
+              <option>Bottles</option><option>Bags</option>
+              <option>Personal care</option><option>Cleaning</option><option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="price">Purchase price (₹) *</label>
+            <input id="price" type="number" min="0" step="0.01" required placeholder="250">
+          </div>
+          <div class="field">
+            <label for="uses">Expected total uses *</label>
+            <input id="uses" type="number" min="1" step="1" required placeholder="200">
+          </div>
+          <div class="field">
+            <label for="material">Main material *</label>
+            <input id="material" required maxlength="100" placeholder="e.g. stainless steel">
+          </div>
+          <div class="field">
+            <label for="durability">Durability (0–5) *</label>
+            <select id="durability" required>
+              <option value="0">0 — unknown</option><option value="1">1 — very low</option>
+              <option value="2">2 — low</option><option value="3">3 — moderate</option>
+              <option value="4">4 — high</option><option value="5">5 — very high</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="recyclability">End-of-life options (0–5) *</label>
+            <select id="recyclability" required>
+              <option value="0">0 — unknown</option><option value="1">1 — very limited</option>
+              <option value="2">2 — limited</option><option value="3">3 — some options</option>
+              <option value="4">4 — good local options</option><option value="5">5 — verified suitable option</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="packaging">Packaging (0–5) *</label>
+            <select id="packaging" required>
+              <option value="0">0 — unknown</option><option value="1">1 — high / hard to manage</option>
+              <option value="2">2 — relatively high</option><option value="3">3 — moderate</option>
+              <option value="4">4 — relatively low</option><option value="5">5 — minimal / documented improvement</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="reuse">Reusable?</label>
+            <select id="reuse"><option>Yes</option><option>No</option><option>Depends</option></select>
+          </div>
+          <div class="field">
+            <label for="source">Evidence source (optional)</label>
+            <input id="source" type="url" placeholder="https://...">
+          </div>
+        </div>
+        <div class="field">
+          <label for="notes">Trade-offs and evidence notes</label>
+          <textarea id="notes" rows="3" maxlength="500" placeholder="What is known? What is uncertain?"></textarea>
+        </div>
+        <button class="primary" type="submit">Add product to catalogue</button>
+      </form>
+      <p id="formMessage" class="muted" role="status"></p>
+    </div>
+  </section>
+
+  <section id="science">
+    <h2>How to interpret the results</h2>
+    <div class="panel">
+      <h3>Cost per use</h3>
+      <p>Purchase price ÷ expected total uses. This excludes repairs, refills, replacement parts and disposal costs unless you add them yourself.</p>
+      <h3>Transparent screening score</h3>
+      <p>
+        The score is a weighted average of durability (40%), end-of-life options
+        (35%) and packaging (25%). Each rating is 0–5, converted to 0–100.
+        Zero means unknown and is excluded from the average, so incomplete
+        data cannot be mistaken for a confirmed poor rating. The score is
+        still a user-entered screening estimate, not a carbon footprint.
+      </p>
+      <h3>Important trade-offs</h3>
+      <p>
+        A reusable item may need many uses to offset its manufacturing impact.
+        Results also depend on actual lifespan, production, transport, cleaning,
+        local recycling facilities and what product it replaces.
+      </p>
+      <h3>Recommended references</h3>
+      <ul>
+        <li><a href="https://www.unep.org/explore-topics/resource-efficiency/what-we-do/sustainable-lifestyles/consumer-information-including" target="_blank" rel="noopener">UN Environment Programme — consumer sustainability information</a></li>
+        <li><a href="https://wedocs.unep.org/handle/20.500.11822/22395" target="_blank" rel="noopener">UNEP — Guidelines for Providing Product Sustainability Information</a></li>
+        <li><a href="https://www.eprewaste.cpcb.gov.in/" target="_blank" rel="noopener">India's Central Pollution Control Board — e-waste management portal</a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <strong>EcoWise | CHE110 Green Product Decision Tool</strong>
+  <p>Educational project • Verify product information before making purchasing decisions.</p>
+</footer>
+
+<script>
+"use strict";
+
+const products = [
+  {
+    id: 1, name: "Steel water bottle", category: "Bottles",
+    price: 450, uses: 1000, material: "Stainless steel",
+    reuse: "Yes", durability: 5, recyclability: 4, packaging: 3,
+    notes: "Illustrative example. Actual production impact and lifespan are not verified.",
+    source: "", demo: true
+  },
+  {
+    id: 2, name: "Single-use plastic bottle", category: "Bottles",
+    price: 20, uses: 1, material: "PET plastic",
+    reuse: "No", durability: 1, recyclability: 2, packaging: 2,
+    notes: "Illustrative example. Recycling depends on local collection and processing.",
+    source: "", demo: true
+  },
+  {
+    id: 3, name: "Cotton shopping bag", category: "Bags",
+    price: 120, uses: 100, material: "Cotton",
+    reuse: "Yes", durability: 4, recyclability: 3, packaging: 4,
+    notes: "Illustrative example. Cotton production impacts and required reuse count vary.",
+    source: "", demo: true
+  },
+  {
+    id: 4, name: "Plastic shopping bag", category: "Bags",
+    price: 5, uses: 1, material: "Plastic",
+    reuse: "Depends", durability: 2, recyclability: 1, packaging: 2,
+    notes: "Illustrative example. Actual use and disposal conditions matter.",
+    source: "", demo: true
+  },
+  {
+    id: 5, name: "Bamboo-handle toothbrush", category: "Personal care",
+    price: 80, uses: 1, material: "Bamboo handle; bristles vary",
+    reuse: "No", durability: 3, recyclability: 2, packaging: 4,
+    notes: "Illustrative example. Handle and bristles may require different disposal routes.",
+    source: "", demo: true
+  },
+  {
+    id: 6, name: "Plastic toothbrush", category: "Personal care",
+    price: 40, uses: 1, material: "Plastic and bristles",
+    reuse: "No", durability: 3, recyclability: 1, packaging: 3,
+    notes: "Illustrative example. Check local recycling acceptance.",
+    source: "", demo: true
+  }
+];
+
+let nextId = 7;
+let chosen = [1, 2];
+
+const $ = id => document.getElementById(id);
+const esc = value => String(value).replace(/[&<>"']/g, ch => ({
+  "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+})[ch]);
+
+function screening(p) {
+  const criteria = [
+    {name:"Durability", value:p.durability, weight:.40},
+    {name:"End-of-life options", value:p.recyclability, weight:.35},
+    {name:"Packaging", value:p.packaging, weight:.25}
+  ];
+  const known = criteria.filter(c => c.value > 0);
+  const totalWeight = known.reduce((sum,c) => sum + c.weight, 0);
+  if (!known.length) return {score:null, coverage:0};
+  const score = known.reduce((sum,c) => sum + c.value*c.weight, 0)
+    / totalWeight * 20;
+  return {
+    score:Math.round(score),
+    coverage:Math.round(totalWeight*100)
+  };
+}
+
+function costPerUse(p) {
+  return p.uses > 0 ? p.price/p.uses : null;
+}
+
+function money(n) {
+  return "₹" + n.toLocaleString("en-IN", {
+    minimumFractionDigits:2, maximumFractionDigits:2
+  });
+}
+
+function renderCatalogue() {
+  const query = $("search").value.trim().toLowerCase();
+  const category = $("filter").value;
+  const filtered = products.filter(p =>
+    (p.name + " " + p.material + " " + p.category).toLowerCase().includes(query)
+    && (!category || p.category === category)
+  );
+
+  $("count").textContent = `${filtered.length} products shown.`;
+  $("catalogueGrid").innerHTML = filtered.map(p => {
+    const s = screening(p);
+    return `
+      <article class="card">
+        <span class="pill">${esc(p.category)}</span>
+        <h3>${esc(p.name)}</h3>
+        <p class="price">${money(p.price)}</p>
+        <p>Material: ${esc(p.material)}</p>
+        <p>Expected uses: ${p.uses.toLocaleString("en-IN")}</p>
+        <p>Estimated cost/use: <strong>${money(costPerUse(p))}</strong></p>
+        <p>Screening score:
+          <span class="metric">${s.score === null ? "Not enough data" : s.score + "/100"}</span>
+        </p>
+        <p class="small">${s.coverage}% of weighted criteria have ratings.
+        ${p.demo ? "Sample data — not verified." : "User-entered data — check evidence."}</p>
+        <button class="secondary" data-select="${p.id}">
+          ${chosen.includes(p.id) ? "✓ Selected for comparison" : "Compare this product"}
+        </button>
+      </article>`;
+  }).join("");
+
+  $("catalogueGrid").querySelectorAll("[data-select]").forEach(button => {
+    button.addEventListener("click", () => {
+      const id = Number(button.dataset.select);
+      if (chosen.includes(id)) {
+        chosen = chosen.filter(x => x !== id);
+      } else if (chosen.length < 2) {
+        chosen.push(id);
+      } else {
+        chosen = [chosen[1], id];
+      }
+      syncSelects();
+      renderCatalogue();
+      renderComparison();
+    });
+  });
+}
+
+function syncSelects() {
+  const oldA = Number($("productA").value);
+  const oldB = Number($("productB").value);
+  const options = products.map(p =>
+    `<option value="${p.id}">${esc(p.name)}</option>`
+  ).join("");
+  $("productA").innerHTML = options;
+  $("productB").innerHTML = options;
+
+  const a = products.some(p => p.id === oldA) ? oldA : (chosen[0] || products[0].id);
+  const b = products.some(p => p.id === oldB) ? oldB : (chosen[1] || products[1]?.id || products[0].id);
+  $("productA").value = a;
+  $("productB").value = b;
+}
+
+function renderComparison() {
+  const a = products.find(p => p.id === Number($("productA").value));
+  const b = products.find(p => p.id === Number($("productB").value));
+  if (!a || !b) return;
+
+  if (a.id === b.id) {
+    $("comparisonOutput").innerHTML =
+      '<div class="notice">Choose two different products to compare.</div>';
+    return;
+  }
+
+  const sa = screening(a), sb = screening(b);
+  const rows = [
+    ["Price", money(a.price), money(b.price)],
+    ["Expected total uses", a.uses.toLocaleString("en-IN"), b.uses.toLocaleString("en-IN")],
+    ["Cost per use", money(costPerUse(a)), money(costPerUse(b))],
+    ["Material", esc(a.material), esc(b.material)],
+    ["Reusable?", esc(a.reuse), esc(b.reuse)],
+    ["Durability rating (0–5)", a.durability || "Unknown", b.durability || "Unknown"],
+    ["End-of-life rating (0–5)", a.recyclability || "Unknown", b.recyclability || "Unknown"],
+    ["Packaging rating (0–5)", a.packaging || "Unknown", b.packaging || "Unknown"],
+    ["Screening score", sa.score === null ? "Unknown" : sa.score + "/100", sb.score === null ? "Unknown" : sb.score + "/100"],
+    ["Criteria with ratings", sa.coverage + "%", sb.coverage + "%"]
+  ];
+
+  let tradeoff = "";
+  if (costPerUse(a) < costPerUse(b)) {
+    tradeoff = `${a.name} has the lower estimated purchase cost per use.`;
+  } else if (costPerUse(b) < costPerUse(a)) {
+    tradeoff = `${b.name} has the lower estimated purchase cost per use.`;
+  } else {
+    tradeoff = "Both products have the same estimated cost per use.";
+  }
+
+  let scoreNote = "The available ratings do not establish an overall environmental winner.";
+  if (sa.score !== null && sb.score !== null && sa.coverage >= 75 && sb.coverage >= 75) {
+    if (sa.score > sb.score) scoreNote = `${a.name} has a higher screening score based on the entered criteria.`;
+    else if (sb.score > sa.score) scoreNote = `${b.name} has a higher screening score based on the entered criteria.`;
+    else scoreNote = "Both products have the same screening score based on the entered criteria.";
+  }
+
+  $("comparisonOutput").innerHTML = `
+    <div class="panel" style="margin-top:18px">
+      <h3>${esc(a.name)} vs ${esc(b.name)}</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Criteria</th><th>${esc(a.name)}</th><th>${esc(b.name)}</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody>
+      </table></div>
+      <div class="winner">
+        <strong>💰 Cost insight</strong><p>${esc(tradeoff)}</p>
+        <strong>🌿 Screening insight</strong><p>${esc(scoreNote)}</p>
+        <p class="small">These estimates do not include full lifecycle impacts, maintenance or disposal costs. A higher screening score is not proof of a lower carbon footprint.</p>
+      </div>
+      <h3>Evidence notes</h3>
+      <p><strong>${esc(a.name)}:</strong> ${esc(a.notes || "No notes supplied.")}</p>
+      <p><strong>${esc(b.name)}:</strong> ${esc(b.notes || "No notes supplied.")}</p>
+      ${a.source ? `<p><a href="${esc(a.source)}" target="_blank" rel="noopener">Open source for ${esc(a.name)}</a></p>` : "<p class='small'>No source supplied for Product A.</p>"}
+      ${b.source ? `<p><a href="${esc(b.source)}" target="_blank" rel="noopener">Open source for ${esc(b.name)}</a></p>` : "<p class='small'>No source supplied for Product B.</p>"}
+      <button id="printReport" class="primary">Print / save comparison as PDF</button>
+    </div>`;
+  $("printReport").addEventListener("click", () => window.print());
+}
+
+$("compareBtn").addEventListener("click", () => {
+  chosen = [Number($("productA").value), Number($("productB").value)];
+  renderCatalogue();
+  renderComparison();
+});
+$("productA").addEventListener("change", renderComparison);
+$("productB").addEventListener("change", renderComparison);
+$("search").addEventListener("input", renderCatalogue);
+$("filter").addEventListener("change", renderCatalogue);
+
+$("addForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const price = Number($("price").value);
+  const uses = Number($("uses").value);
+  const source = $("source").value.trim();
+
+  if (!Number.isFinite(price) || price < 0 || !Number.isInteger(uses) || uses < 1) {
+    $("formMessage").textContent = "Enter a valid non-negative price and a whole number of uses.";
+    return;
+  }
+  if (source) {
+    try {
+      const url = new URL(source);
+      if (!["https:", "http:"].includes(url.protocol)) throw new Error();
+    } catch {
+      $("formMessage").textContent = "Please enter a valid http or https source URL.";
+      return;
+    }
+  }
+
+  const product = {
+    id: nextId++,
+    name: $("name").value.trim(),
+    category: $("category").value,
+    price, uses,
+    material: $("material").value.trim(),
+    durability: Number($("durability").value),
+    recyclability: Number($("recyclability").value),
+    packaging: Number($("packaging").value),
+    reuse: $("reuse").value,
+    source,
+    notes: $("notes").value.trim() || "No evidence notes supplied.",
+    demo: false
+  };
+
+  products.push(product);
+  chosen = [chosen[chosen.length - 1] || products[0].id, product.id];
+  $("addForm").reset();
+  syncSelects();
+  renderCatalogue();
+  renderComparison();
+  $("formMessage").textContent = "Product added for this browser session.";
+  $("compare").scrollIntoView({behavior:"smooth"});
+});
+
+syncSelects();
+renderCatalogue();
+renderComparison();
+</script>
+</body>
+</html>
